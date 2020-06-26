@@ -29,13 +29,25 @@ for task_object in backlog_issues:
     if task_object["status"]["id"] == 1:
         will_do.append(task_object["summary"])
     elif task_object["status"]["id"] == 2:
-        doing.append(task_object["summary"])
-        print(type(task_object["summary"].encode('utf-8')))
+        summary = task_object["summary"].encode('utf-8')
+        doing.append(summary)
     elif task_object["status"]["id"] == 3:
-        do.append(task_object["summary"])
+        summary = task_object["summary"].encode('utf-8')
+        do.append(summary)
     elif task_object["status"]["id"] == 4:
-        done.append(task_object["summary"])
+        summary = task_object["summary"].encode('utf-8')
+        done.append(summary)
     
-print(will_do)
-# print(doing)
-print(doing[0].encode('utf-8'))
+print("未対応")
+for task in will_do:
+    print(task)
+print("\n処理中")
+for task in doing:
+    print(task)
+print("\n処理済")
+for task in do:
+    print(task)
+# print("\n完了")
+# for task in done:
+#     print(task)
+
