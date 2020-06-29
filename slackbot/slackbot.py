@@ -10,7 +10,7 @@ import slackweb
 
 # 取得したいBacklogのURL
 BACKLOG_URL = "https://aws-plus.backlog.jp/api/v2/issues"
-slack = slackweb.Slack(url="https://hooks.slack.com/services/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")
+slack = slackweb.Slack(url="https://hooks.slack.com/services/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")
 
 # 課題の内容
 BACKLOG_PARAMS = {
@@ -29,6 +29,11 @@ def lambda_handler(event,context) :
     doing=list()
     do=list()
     done=list()
+    will_do_task=0
+    doing_task=0
+    do_task=0
+    actualHours=0
+
 
     # データをリクエスト
     backlog_issues = requests.get(BACKLOG_URL, params=BACKLOG_PARAMS).json()
@@ -36,12 +41,20 @@ def lambda_handler(event,context) :
 
     for task_object in backlog_issues:
         if task_object["status"]["id"] == 1:
+            if task_object["estimatedHours"]:
+                will_do_task += task_object["estimatedHours"]
             summary = task_object["summary"].encode('utf-8')
             will_do.append(summary.decode('utf-8'))
         elif task_object["status"]["id"] == 2:
+            if task_object["estimatedHours"]:
+                doing_task += task_object["estimatedHours"]
             summary = task_object["summary"].encode('utf-8')
             doing.append(summary.decode('utf-8'))
         elif task_object["status"]["id"] == 3:
+            if task_object["estimatedHours"]:
+                do_task += task_object["estimatedHours"]
+            if task_object["actualHours"]:
+                actualHours += task_object["actualHours"]
             summary = task_object["summary"].encode('utf-8')
             do.append(summary.decode('utf-8'))
         elif task_object["status"]["id"] == 4:
@@ -53,8 +66,10 @@ def lambda_handler(event,context) :
     id_2 = '\n'.join(doing)
     id_3 = '\n'.join(do)
 
-    result = "未対応\n"+ id_1 + "\n\n処理中\n" + id_2 + "\n\n処理済\n" + id_3
+    result = "未対応\n"+ id_1 +"\n見積もり: " + str(will_do_task) + "\n\n処理中\n" + id_2 + "\n見積もり: "+ str(doing_task) + "\n\n処理済\n" + id_3 + "\n見積もり: " + str(do_task) \
+    + "\n累計実績時間: " + str(actualHours) +"  １時間あたりの消化数: " + str(format((do_task/actualHours),'.2f'))
 
-    slack.notify(text= result, channel = "#agile-training-2020")
+
+    slack.notify(text= result)
 
 
